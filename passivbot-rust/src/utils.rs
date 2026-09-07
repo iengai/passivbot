@@ -1,7 +1,10 @@
 use crate::constants::{LONG, SHORT};
 use crate::types::ExchangeParams;
+#[cfg(feature = "python")]
 use numpy::PyReadonlyArray1;
+#[cfg(feature = "python")]
 use pyo3::exceptions::PyValueError;
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
 
 /// Rounds a number to the specified number of decimal places.
@@ -70,20 +73,20 @@ pub fn tolerant_round_up_preserve_step(value: f64, step: f64) -> f64 {
 }
 
 /// Rounds up a number to the nearest multiple of the given step.
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn round_up(n: f64, step: f64) -> f64 {
     round_up_preserve_step(n, step)
 }
 
 /// Rounds a number to the nearest multiple of the given step.
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn round_(n: f64, step: f64) -> f64 {
     let result = (n / step).round() * step;
     round_to_step_decimal_places(result, step)
 }
 
 /// Rounds down a number to the nearest multiple of the given step.
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn round_dn(n: f64, step: f64) -> f64 {
     round_dn_preserve_step(n, step)
 }
@@ -128,7 +131,7 @@ pub fn quantize_qty(qty: f64, qty_step: f64, mode: RoundingMode, context: &str) 
     quantize_value(qty, qty_step, mode, context)
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn round_dynamic(n: f64, d: i32) -> f64 {
     if n == 0.0 {
         return n;
@@ -139,7 +142,7 @@ pub fn round_dynamic(n: f64, d: i32) -> f64 {
     round_to_decimal_places(result, 10)
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn round_dynamic_up(n: f64, d: i32) -> f64 {
     if n == 0.0 {
         return n;
@@ -150,7 +153,7 @@ pub fn round_dynamic_up(n: f64, d: i32) -> f64 {
     round_to_decimal_places(result, 10)
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn round_dynamic_dn(n: f64, d: i32) -> f64 {
     if n == 0.0 {
         return n;
@@ -169,7 +172,7 @@ pub fn round_dynamic_dn(n: f64, d: i32) -> f64 {
 /// - If any input is non-finite ⇒ hold `prev_val`.
 /// - If `prev_val == 0.0` ⇒ pass through `val`.
 /// - Else update iff |val - prev_val| / |prev_val| > max(0, pct).
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn hysteresis(val: f64, prev_val: f64, pct: f64) -> f64 {
     if !(val.is_finite() && prev_val.is_finite() && pct.is_finite()) {
         return prev_val;
@@ -213,6 +216,7 @@ pub fn ema_last_f64(values: &[f64], span: f64) -> f64 {
     num.map(|value| value / den).unwrap_or(f64::NAN)
 }
 
+#[cfg(feature = "python")]
 #[pyfunction(name = "ema_last")]
 pub fn ema_last_py(values: PyReadonlyArray1<'_, f64>, span: f64) -> PyResult<f64> {
     if !span.is_finite() || span <= 0.0 {
@@ -224,7 +228,7 @@ pub fn ema_last_py(values: PyReadonlyArray1<'_, f64>, span: f64) -> PyResult<f64
     Ok(ema_last_f64(values, span))
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn calc_diff(x: f64, y: f64) -> f64 {
     if y == 0.0 {
         if x == 0.0 {
@@ -237,7 +241,7 @@ pub fn calc_diff(x: f64, y: f64) -> f64 {
     }
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn cost_to_qty(cost: f64, price: f64, c_mult: f64) -> f64 {
     if price > 0.0 {
         (cost.abs() / price) / c_mult
@@ -246,12 +250,12 @@ pub fn cost_to_qty(cost: f64, price: f64, c_mult: f64) -> f64 {
     }
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn qty_to_cost(qty: f64, price: f64, c_mult: f64) -> f64 {
     (qty.abs() * price) * c_mult
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn calc_wallet_exposure(
     c_mult: f64,
     balance: f64,
@@ -279,7 +283,7 @@ pub fn calc_wallet_exposure_if_filled(
     calc_wallet_exposure(exchange_params.c_mult, balance, new_psize, new_pprice)
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn calc_new_psize_pprice(
     psize: f64,
     pprice: f64,
@@ -330,17 +334,17 @@ pub fn interpolate(x: f64, xs: &[f64], ys: &[f64]) -> f64 {
     result
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn calc_pnl_long(entry_price: f64, close_price: f64, qty: f64, c_mult: f64) -> f64 {
     qty.abs() * c_mult * (close_price - entry_price)
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn calc_pnl_short(entry_price: f64, close_price: f64, qty: f64, c_mult: f64) -> f64 {
     qty.abs() * c_mult * (entry_price - close_price)
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn calc_pprice_diff_int(pside: usize, pprice: f64, price: f64) -> f64 {
     match pside {
         LONG => {
@@ -362,13 +366,13 @@ pub fn calc_pprice_diff_int(pside: usize, pprice: f64, price: f64) -> f64 {
 }
 
 /// Pside-aware signed price difference helper. Alias of calc_pprice_diff_int with clearer name.
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn calc_pside_price_diff_int(pside: usize, pprice: f64, price: f64) -> f64 {
     calc_pprice_diff_int(pside, pprice, price)
 }
 
 /// Backwards-compatible alias; prefer calc_pside_price_diff_int.
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn calc_price_diff_pside_int(pside: usize, pprice: f64, price: f64) -> f64 {
     calc_pside_price_diff_int(pside, pprice, price)
 }
@@ -389,6 +393,7 @@ pub fn calc_order_price_diff_ask(order_price: f64, market_price: f64) -> f64 {
     }
 }
 
+#[cfg(feature = "python")]
 #[pyfunction]
 pub fn calc_order_price_diff(side: &str, order_price: f64, market_price: f64) -> PyResult<f64> {
     if !order_price.is_finite() || !market_price.is_finite() || market_price <= 0.0 {
@@ -408,7 +413,7 @@ pub fn calc_order_price_diff(side: &str, order_price: f64, market_price: f64) ->
     Ok(diff)
 }
 
-#[pyfunction]
+#[cfg_attr(feature = "python", pyfunction)]
 pub fn calc_auto_unstuck_allowance(
     balance: f64,
     loss_allowance_pct: f64,

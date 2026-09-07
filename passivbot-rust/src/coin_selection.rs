@@ -1,6 +1,9 @@
 use crate::types::ForagerScoreWeights;
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
+#[cfg(feature = "python")]
 use pyo3::types::PyAny;
+#[cfg(feature = "python")]
 use pyo3::FromPyObject;
 use std::cmp::Ordering;
 use std::collections::HashSet;
@@ -31,6 +34,8 @@ pub enum ForagerPositionSide {
 }
 
 impl ForagerPositionSide {
+    // Only the pyo3 wrapper parses position sides from strings.
+    #[cfg_attr(not(feature = "python"), allow(dead_code))]
     fn from_str(value: &str) -> Result<Self, ForagerSelectionError> {
         match value {
             "long" => Ok(Self::Long),
@@ -642,6 +647,7 @@ pub struct CoinFeatureInput {
     pub ema_readiness_score: f64,
 }
 
+#[cfg(feature = "python")]
 impl<'source> FromPyObject<'source> for CoinFeatureInput {
     fn extract(ob: &'source PyAny) -> PyResult<Self> {
         let index = ob.get_item("index")?.extract::<usize>()?;
@@ -671,6 +677,7 @@ impl From<CoinFeatureInput> for CoinFeature {
     }
 }
 
+#[cfg(feature = "python")]
 impl<'source> FromPyObject<'source> for ForagerScoreWeights {
     fn extract(ob: &'source PyAny) -> PyResult<Self> {
         Ok(Self {
@@ -681,6 +688,7 @@ impl<'source> FromPyObject<'source> for ForagerScoreWeights {
     }
 }
 
+#[cfg(feature = "python")]
 impl<'source> FromPyObject<'source> for ForagerCandidate {
     fn extract(ob: &'source PyAny) -> PyResult<Self> {
         Ok(Self {
@@ -697,6 +705,7 @@ impl<'source> FromPyObject<'source> for ForagerCandidate {
     }
 }
 
+#[cfg(feature = "python")]
 #[pyfunction]
 pub fn select_coin_indices_py(
     py_features: Vec<CoinFeatureInput>,
@@ -724,6 +733,7 @@ pub fn select_coin_indices_py(
     Ok(select_coins(&features, &cfg))
 }
 
+#[cfg(feature = "python")]
 #[pyfunction]
 pub fn select_forager_candidates_py(
     py_candidates: Vec<ForagerCandidate>,

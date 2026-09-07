@@ -1,10 +1,14 @@
 use core::str::FromStr;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
+#[cfg(feature = "python")]
 use numpy::{PyArray1, PyArray3, PyUntypedArrayMethods};
+#[cfg(feature = "python")]
 use pyo3::exceptions::PyValueError;
+#[cfg(feature = "python")]
 use pyo3::prelude::{Py, PyResult, Python};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+#[cfg(feature = "python")]
 use std::collections::HashSet;
 use strum_macros::{Display, EnumIter, EnumString};
 
@@ -67,6 +71,7 @@ pub struct HlcvsMeta {
 /// Represents a fully-qualified HLCV tensor and its associated metadata.  The NumPy arrays are
 /// stored as owned Python references so Rust callers can obtain zero-copy views as needed while
 /// Python retains control over the underlying memory.
+#[cfg(feature = "python")]
 #[derive(Clone)]
 pub struct HlcvsBundle {
     pub hlcvs: Py<PyArray3<f64>>,
@@ -75,6 +80,7 @@ pub struct HlcvsBundle {
     pub meta: HlcvsMeta,
 }
 
+#[cfg(feature = "python")]
 impl HlcvsBundle {
     pub fn coin_meta_by_index(&self, idx: usize) -> Option<&CoinMeta> {
         self.meta.coins.iter().find(|coin| coin.index == idx)

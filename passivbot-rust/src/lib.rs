@@ -1,26 +1,34 @@
-mod analysis;
-mod backtest;
-mod closes;
-mod coin_selection;
-mod constants;
-mod dynamic;
-mod entries;
-mod equity_hard_stop_loss;
-mod orchestrator;
+pub mod analysis;
+pub mod backtest;
+pub mod closes;
+pub mod coin_selection;
+pub mod constants;
+pub mod dynamic;
+pub mod entries;
+pub mod equity_hard_stop_loss;
+pub mod orchestrator;
+#[cfg(feature = "python")]
 mod python;
-mod risk;
-mod strategies;
-mod trailing;
-mod types;
-mod utils;
+pub mod risk;
+pub mod strategies;
+pub mod trailing;
+pub mod types;
+pub mod utils;
 
+#[cfg(feature = "python")]
 use coin_selection::{select_coin_indices_py, select_forager_candidates_py};
+#[cfg(feature = "python")]
 use pyo3::prelude::*;
+#[cfg(feature = "python")]
 use pyo3::types::PyDict;
+#[cfg(feature = "python")]
 use pyo3::wrap_pyfunction;
+#[cfg(feature = "python")]
 use python::*;
+#[cfg(feature = "python")]
 use utils::*;
 
+#[cfg(feature = "python")]
 #[pyfunction]
 fn runtime_build_info(py: Python<'_>) -> PyResult<PyObject> {
     let info = PyDict::new_bound(py);
@@ -33,6 +41,7 @@ fn runtime_build_info(py: Python<'_>) -> PyResult<PyObject> {
 }
 
 /// A Python module implemented in Rust.
+#[cfg(feature = "python")]
 #[pymodule]
 fn passivbot_rust(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<HlcvsBundlePy>()?;
